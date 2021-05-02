@@ -3,6 +3,7 @@ import xml.etree.ElementTree as etree
 import requests
 import sys
 import warnings
+from tqdm import tqdm
 
 #just so requests doesn't bug me for using an insecure connection
 warnings.filterwarnings("ignore")
@@ -31,7 +32,11 @@ with open('temp.xml', 'wb') as f:
 xml = open('temp.xml', 'r')
 
 #construct element tree of xml file
-tree = etree.parse(xml)
+try:
+    tree = etree.parse(xml)
+except:
+    print("invalid xml, aborting")
+    exit()
     
 #get the first tag in the xml tree
 root = tree.getroot()
@@ -51,8 +56,11 @@ for tag in root.findall('./tag/package'):
     splitIndex = downloadUrl.rsplit('/')
     #get the last entry in the list for the filename
     fullFileName = splitIndex[len(splitIndex)-1]
+    #get size of file
+    total_size = int(conn2.headers['content-length'])
     #write contents
     with open(fullFileName, 'wb') as f:
-        f.write(conn2.content)
+        for data in tqdm(iterable = conn2.iter_content(chunk_size = 1024), total = total_size/1024, unit = 'MB'):
+            f.write(conn2.content)
         f.close()
         print("download done! exiting")
