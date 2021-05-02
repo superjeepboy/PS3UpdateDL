@@ -34,7 +34,7 @@ xml = open('temp.xml', 'r')
 #construct element tree of xml file
 try:
     tree = etree.parse(xml)
-except:
+except Exception:
     print("invalid xml, aborting")
     exit()
     
